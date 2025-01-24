@@ -31,14 +31,14 @@ import com.revature.Project1.services.WorldService;
 @CrossOrigin(origins = "*", maxAge=3600)
 @RequestMapping("backpack")
 @EnableAsync
-public class MainpageController {
+public class HomeController {
     private final UserService userService;
     private final DuckService duckService;
     private final WorldService worldService;
     private final SupplementaryFunctions supFunctions;
 
     @Autowired
-    public MainpageController(UserService userService, DuckService duckService, WorldService worldService, SupplementaryFunctions supFunctions) {
+    public HomeController(UserService userService, DuckService duckService, WorldService worldService, SupplementaryFunctions supFunctions) {
         this.userService = userService;
         this.duckService = duckService;
         this.worldService = worldService;

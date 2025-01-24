@@ -1,43 +1,99 @@
 package com.revature.Project1.services;
 
+import com.revature.Project1.Components.Encoder;
+import com.revature.Project1.Components.FileLogger;
 import com.revature.Project1.daos.UserDAO;
-import com.revature.Project1.exceptions.ClientSideException;
-import com.revature.Project1.exceptions.ConflictException;
-import com.revature.Project1.exceptions.PasswordException;
-import com.revature.Project1.exceptions.UsernameException;
+import com.revature.Project1.exceptions.*;
+import com.revature.Project1.models.Inventory;
 import com.revature.Project1.models.User;
+import jakarta.transaction.Transactional;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
     private final UserDAO userDAO;
+    private final Encoder encoder;
+    private final Logger log;
 
     @Autowired
-    public UserService(UserDAO userDAO) {
+    public UserService(UserDAO userDAO, Encoder encoder, FileLogger log){
         this.userDAO = userDAO;
+        this.encoder = encoder;
+        this.log = log.log;
     }
 
-    public Optional<User> getUserById(Integer id){
-        return userDAO.findById(id);
+    public User getUserById(Integer id) throws NotFound {
+        Optional<User> foundUser = userDAO.findById(id);
+        if(foundUser.isEmpty()) throw new NotFound("User not found");
+        return foundUser.get();
     }
 
-    public Optional<User> getUserByUsername(User user){
-        return userDAO.findUserByUsername(user.getUsername());
+    public User getUserByUsername(User user){
+        Optional<User> foundUser = userDAO.findUserByUsername(user.getUsername());
+        if(foundUser.isEmpty()) throw new NotFound("User not found");
+        return foundUser.get();
     }
 
+    public User getUserByUsername(String user){
+        Optional<User> foundUser = userDAO.findUserByUsername(user);
+        if(foundUser.isEmpty()) throw new NotFound("User not found");
+        return foundUser.get();
+    }
+
+    public String SetRefreshToken(Integer id){
+        log.trace("Setting refresh token for user with id " + id);
+        Optional<User> foundUser = userDAO.findById(id);
+        if(foundUser.isEmpty()) throw new NotFound("User not found");
+        User user = foundUser.get();
+
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[64];
+        random.nextBytes(bytes);
+        user.setRefreshToken(bytes.toString());
+
+        userDAO.save(user);
+        return bytes.toString();
+    }
+
+    public String SetLoginToken(Integer id){
+        log.trace("Setting login token for user with id " + id);
+        Optional<User> foundUser = userDAO.findById(id);
+        if(foundUser.isEmpty()) throw new NotFound("User not found");
+        User user = foundUser.get();
+
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[64];
+        random.nextBytes(bytes);
+        user.setLoginToken(bytes.toString());
+
+        userDAO.save(user);
+        return bytes.toString();
+    }
+
+    @Transactional
     public User createUser(User user) throws PasswordException, UsernameException, ConflictException {
-        if(user.getPassword().length() < 4) throw new PasswordException();
+        log.trace("Creating user with username " + user.getUsername());
         if(user.getUsername().trim().isEmpty()) throw new UsernameException();
+        /*
+            * Password must contain at least one digit [0-9]
+            * Password must contain at least one lowercase/uppercase Latin character [a-z]
+            * Password must contain at least one special character like ! @ # & ( )
+         */
+        String regex = "^(?=.*\\d)(?=.*[a-zA-Z])(?=.*[\\W_]).{8,}$";
+        if(!user.getPassword().matches(regex)) throw new PasswordException();
         if(userDAO.findUserByUsername(user.getUsername()).isPresent()) throw new ConflictException();
-        if(user.getUsername().equals("admin")) {
-            user.setAdmin(1);
-            user.setBackpack_space(999999);
-        }
-        user.setBackpack_space(6);
+        user.setPassword(encoder.passwordEncoder.encode(user.getPassword()));
+        Inventory newInventory = new Inventory();
+        user.setInventory(newInventory);
         return userDAO.save(user);
     }
 
@@ -49,16 +105,17 @@ public class UserService {
         Optional<User> userObtained = userDAO.findById(user.getId());
         if(userObtained.isEmpty()) throw new ClientSideException();
         User returnUser = userObtained.get();
-        returnUser.setBank_account((float)(returnUser.getBank_account() + amount));
+        returnUser.getInventory().setBankAccount((double)(returnUser.getInventory().getBankAccount() + amount));
         userDAO.save(returnUser);
         return returnUser;
     }
 
     public User setUserBackpackAmount(User user) throws ClientSideException{
+        log.trace("Setting backpack amount for user with id " + user.getId());
         Optional<User> userObtained = userDAO.findById(user.getId());
         if(userObtained.isEmpty()) throw new ClientSideException();
         User returnUser = userObtained.get();
-        returnUser.setBackpack_space((returnUser.getBackpack_space() + 1));
+        returnUser.getInventory().setBackpackSpace((returnUser.getInventory().getBackpackSpace() + 1));
         userDAO.save(returnUser);
         return returnUser;
     }

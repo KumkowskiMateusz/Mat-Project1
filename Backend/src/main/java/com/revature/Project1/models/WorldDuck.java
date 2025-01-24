@@ -17,14 +17,14 @@ public class WorldDuck {
     private Integer value;
 
     public WorldDuck(Integer worldId, String rank, Integer value) {
-        log.info("Parametrized constructor for WorldDuck");
+        log.trace("Parametrized constructor for WorldDuck");
         this.worldId = worldId;
         this.rank = rank;
         this.value = value;
     }
 
     public WorldDuck() {
-        log.info("No-args constructor for WorldDuck");
+        log.trace("No-args constructor for WorldDuck");
         this.worldId = 0;
         this.rank = "Default";
         this.value = 0;
@@ -35,7 +35,7 @@ public class WorldDuck {
     }
 
     public void setValue(Integer value) {
-        log.info("Setting value to " + value);
+        log.trace("Setting value to " + value);
         this.value = value;
     }
 
@@ -44,7 +44,7 @@ public class WorldDuck {
     }
 
     public void setWorldId(Integer worldId) {
-        log.info("Setting worldId to " + worldId);
+        log.trace("Setting worldId to " + worldId);
         this.worldId = worldId;
     }
 
@@ -53,7 +53,7 @@ public class WorldDuck {
     }
 
     public void setRank(String rank) {
-        log.info("Setting rank to " + rank);
+        log.trace("Setting rank to " + rank);
         this.rank = rank;
     }
 

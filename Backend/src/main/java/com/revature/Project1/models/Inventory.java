@@ -26,7 +26,7 @@ public class Inventory {
     private Integer potionV3;
 
     public Inventory() {
-        log.info("No-args constructor for Inventory");
+        log.trace("No-args constructor for Inventory");
         this.backpackSpace = 6;
         this.potionV1 = 0;
         this.potionV2 = 0;
@@ -39,7 +39,7 @@ public class Inventory {
     }
 
     public void setBackpackSpace(Integer backpackSpace) {
-        log.info("Setting backpackSpace to " + backpackSpace);
+        log.trace("Setting backpackSpace to " + backpackSpace);
         this.backpackSpace = backpackSpace;
     }
 
@@ -56,7 +56,7 @@ public class Inventory {
     }
 
     public void setPotionV1(Integer potionV1) {
-        log.info("Setting potionV1 to " + potionV1);
+        log.trace("Setting potionV1 to " + potionV1);
         this.potionV1 = potionV1;
     }
 
@@ -65,7 +65,7 @@ public class Inventory {
     }
 
     public void setPotionV2(Integer potionV2) {
-        log.info("Setting potionV2 to " + potionV2);
+        log.trace("Setting potionV2 to " + potionV2);
         this.potionV2 = potionV2;
     }
 
@@ -74,7 +74,7 @@ public class Inventory {
     }
 
     public void setPotionV3(Integer potionV3) {
-        log.info("Setting potionV3 to " + potionV3);
+        log.trace("Setting potionV3 to " + potionV3);
         this.potionV3 = potionV3;
     }
 

@@ -21,30 +21,31 @@ public class World {
 
     private Integer seachingFee;
 
-    private Set<Duck> worldInfo;
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<WorldDuck> worldInfo;
 
     @NonNull
     private String worldName;
 
     public World(@NonNull String worldName, Integer seachingFee) {
-        log.info("Parametrized constructor for World " + worldName);
+        log.trace("Parametrized constructor for World " + worldName);
         this.worldName = worldName;
         this.seachingFee = seachingFee;
     }
 
     public World() {
-        log.info("No-args constructor for World");
+        log.trace("No-args constructor for World");
         this.seachingFee = 0;
         this.worldName = "Default";
-        this.worldInfo =  new HashSet<Duck>();
+        this.worldInfo =  new HashSet<WorldDuck>();
     }
 
-    public Set<Duck> getWorldInfo() {
+    public Set<WorldDuck> getWorldInfo() {
         return worldInfo;
     }
 
-    public void setWorldInfo(Set<Duck> worldInfo) {
-        log.info("Setting worldInfo to " + worldInfo);
+    public void setWorldInfo(Set<WorldDuck> worldInfo) {
+        log.trace("Setting worldInfo to " + worldInfo);
         this.worldInfo = worldInfo;
     }
 
@@ -53,7 +54,7 @@ public class World {
     }
 
     public void setSeachingFee(Integer seachingFee) {
-        log.info("Setting seachingFee to " + seachingFee);
+        log.trace("Setting seachingFee to " + seachingFee);
         this.seachingFee = seachingFee;
     }
 
@@ -63,7 +64,7 @@ public class World {
     }
 
     public void setWorldName(@NonNull String worldName) {
-        log.info("Setting worldName to " + worldName);
+        log.trace("Setting worldName to " + worldName);
         this.worldName = worldName;
     }
 

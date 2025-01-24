@@ -30,14 +30,9 @@ public class DuckService {
 
 
     public Optional<Duck> setDuckNicknameById(Duck duck) throws ClientSideException, AuthorizationException {
+        //TODO
         Optional<Duck> resultDuck = duckDAO.findById(duck.getId());
         if(resultDuck.isEmpty()) throw new ClientSideException();
-        if(duck.getReference_id() != resultDuck.get().getReference_id()) throw new AuthorizationException();
-        if(duck.getNickname().trim().isEmpty()) throw new ClientSideException();
-        Duck innerDuck = resultDuck.get();
-        innerDuck.setNickname(duck.getNickname());
-        duckDAO.save(innerDuck);
-        return resultDuck;
     }
 
     public Optional<Duck> deleteDuckById(Duck duck) throws ClientSideException {
