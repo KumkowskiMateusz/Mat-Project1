@@ -1,12 +1,16 @@
 package com.revature.Project1.models;
 
 import jakarta.persistence.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
 
 @Entity
 @Table(name = "users")
 public class User {
+    private static final Logger log = LogManager.getLogger(User.class);
     /*
      * id (Primary Key)
      * username
@@ -20,22 +24,29 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+
+    @Column(unique = true, nullable = false)
     private String username;
+
+    @Column(nullable = false)
     private String password;
-    private double bank_account;
 
-    @ColumnDefault("6")
-    private int backpack_space;
+    @Column(nullable = false)
+    private UserTypes userType;
+    private Inventory inventory;
 
-    private int admin;
-
-    public User(String password, String username) {
+    public User(String password, String username, UserTypes userType) {
+        log.info("Parametrized constructor for User " + username);
         this.password = password;
         this.username = username;
+        this.userType = userType;
     }
 
     public User(){
-        
+        log.info("No-args constructor for User");
+        this.username = "Default";
+        this.password = "Default";
+        this.userType = UserTypes.USER;
     }
 
     public String getUsername() {
@@ -43,6 +54,7 @@ public class User {
     }
 
     public void setUsername(String username) {
+        log.info("Setting username to " + username);
         this.username = username;
     }
 
@@ -54,35 +66,25 @@ public class User {
         this.password = password;
     }
 
-    public double getBank_account() {
-        return bank_account;
+    public UserTypes getUserType() {
+        return userType;
     }
 
-    public void setBank_account(float bank_account) {
-        this.bank_account = bank_account;
+    public void setUserType(UserTypes userType) {
+        log.warn("Set userType to " + userType);
+        this.userType = userType;
     }
 
-    public int getBackpack_space() {
-        return backpack_space;
+    public Inventory getInventory() {
+        return inventory;
     }
 
-    public void setBackpack_space(int backpack_space) {
-        this.backpack_space = backpack_space;
-    }
-
-    public int getAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(int admin) {
-        this.admin = admin;
+    public void setInventory(Inventory inventory) {
+        log.info("Setting inventory");
+        this.inventory = inventory;
     }
 
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 }
