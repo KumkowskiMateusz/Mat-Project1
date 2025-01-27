@@ -2,6 +2,7 @@ package com.revature.Project1.services;
 
 import com.revature.Project1.Components.Encoder;
 import com.revature.Project1.Components.FileLogger;
+import com.revature.Project1.daos.InventoryDAO;
 import com.revature.Project1.daos.UserDAO;
 import com.revature.Project1.exceptions.*;
 import com.revature.Project1.models.Inventory;
@@ -23,12 +24,14 @@ public class UserService {
     private final UserDAO userDAO;
     private final Encoder encoder;
     private final Logger log;
+    private final InventoryDAO inventoryDAO;
 
     @Autowired
-    public UserService(UserDAO userDAO, Encoder encoder, FileLogger log){
+    public UserService(UserDAO userDAO, Encoder encoder, FileLogger log, InventoryDAO inventoryDAO){
         this.userDAO = userDAO;
         this.encoder = encoder;
         this.log = log.log;
+        this.inventoryDAO = inventoryDAO;
     }
 
     public User getUserById(Integer id) throws NotFound {
@@ -73,7 +76,6 @@ public class UserService {
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[64];
         random.nextBytes(bytes);
-        user.setLoginToken(bytes.toString());
 
         userDAO.save(user);
         return bytes.toString();
@@ -94,6 +96,7 @@ public class UserService {
         user.setPassword(encoder.passwordEncoder.encode(user.getPassword()));
         Inventory newInventory = new Inventory();
         user.setInventory(newInventory);
+        inventoryDAO.save(newInventory);
         return userDAO.save(user);
     }
 
@@ -101,21 +104,26 @@ public class UserService {
         return userDAO.findAll();
     }
 
-    public User setUserBankAccount(User user, Double amount) throws ClientSideException{
+    public User setUserBankAccount(User user, Double amount) throws NotFound{
         Optional<User> userObtained = userDAO.findById(user.getId());
-        if(userObtained.isEmpty()) throw new ClientSideException();
+        if(userObtained.isEmpty()) throw new NotFound("User not found");
         User returnUser = userObtained.get();
         returnUser.getInventory().setBankAccount((double)(returnUser.getInventory().getBankAccount() + amount));
+
+        inventoryDAO.save(returnUser.getInventory());
         userDAO.save(returnUser);
+
         return returnUser;
     }
 
-    public User setUserBackpackAmount(User user) throws ClientSideException{
+    public User setUserBackpackAmount(User user) throws NotFound{
         log.trace("Setting backpack amount for user with id " + user.getId());
         Optional<User> userObtained = userDAO.findById(user.getId());
-        if(userObtained.isEmpty()) throw new ClientSideException();
+        if(userObtained.isEmpty()) throw new NotFound("User not found");
         User returnUser = userObtained.get();
         returnUser.getInventory().setBackpackSpace((returnUser.getInventory().getBackpackSpace() + 1));
+
+        inventoryDAO.save(returnUser.getInventory());
         userDAO.save(returnUser);
         return returnUser;
     }

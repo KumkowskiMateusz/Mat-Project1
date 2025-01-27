@@ -26,7 +26,6 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-
     @Column(unique = true, nullable = false)
     private String username;
 
@@ -39,11 +38,13 @@ public class User {
     @OneToOne(cascade = CascadeType.ALL)
     private Inventory inventory;
 
-    @OneToMany(mappedBy = "id", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "referenceId")
     private Set<Duck> ducks;
 
-    private String loginToken;
-    private String refreshToken;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "userId")
+    private Set<Auth> auths;
 
     public User(String password, String username, UserTypes userType) {
         log.trace("Parametrized constructor for User " + username);
@@ -107,21 +108,4 @@ public class User {
         this.ducks = ducks;
     }
 
-    public String getLoginToken() {
-        return loginToken;
-    }
-
-    public void setLoginToken(String loginToken) {
-        log.trace("Setting loginToken");
-        this.loginToken = loginToken;
-    }
-
-    public String getRefreshToken() {
-        return refreshToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
-        log.trace("Setting refreshToken");
-        this.refreshToken = refreshToken;
-    }
 }

@@ -3,10 +3,12 @@ package com.revature.Project1.services;
 import com.revature.Project1.daos.DuckDAO;
 import com.revature.Project1.exceptions.AuthorizationException;
 import com.revature.Project1.exceptions.ClientSideException;
+import com.revature.Project1.exceptions.NotFound;
 import com.revature.Project1.models.Duck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,8 +22,10 @@ public class DuckService {
         this.duckDAO = duckDAO;
     }
 
-    public Optional<Duck> getDuckById(int id){
-        return duckDAO.findById(id);
+    public Duck getDuckById(int id)  throws NotFound {
+        Optional<Duck> foundDuck = duckDAO.findById(id);
+        if(foundDuck.isEmpty()) throw new NotFound("Duck not found");
+        return foundDuck.get();
     }
 
     public List<Duck> getDucksByForeignId(int referenceId){
@@ -30,7 +34,6 @@ public class DuckService {
 
 
     public Optional<Duck> setDuckNicknameById(Duck duck) throws ClientSideException, AuthorizationException {
-        //TODO
         Optional<Duck> resultDuck = duckDAO.findById(duck.getId());
         if(resultDuck.isEmpty()) throw new ClientSideException();
     }

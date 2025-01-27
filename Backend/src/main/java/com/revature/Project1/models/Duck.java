@@ -20,17 +20,30 @@ public class Duck {
     private int id;
 
     private Integer value;
+    private Integer referenceId;
     private String rank;
     private String nickname;
+    private Integer chance;
 
     public Duck(){
         log.trace("No-args constructor for Duck");
     }
 
-    public Duck(int referenceId, String rank, String nickname) {
+    public Duck(int referenceId, String rank, String nickname, int value, int chance) {
         log.trace("Parametrized constructor for Duck " + referenceId);
         this.rank = rank;
         this.nickname = nickname;
+        this.referenceId = referenceId;
+        this.value = value;
+        this.chance = chance;
+    }
+
+    public Integer getChance() {
+        return chance;
+    }
+
+    public void setChance(Integer chance) {
+        this.chance = chance;
     }
 
     public int getId() {
@@ -57,5 +70,17 @@ public class Duck {
     public void setValue(Integer value) {
         log.trace("Setting value to " + value);
         this.value = value;
+    }
+
+    public Integer getReferenceId() {
+        return referenceId;
+    }
+
+    public void setReferenceId(Integer referenceId) {
+        this.referenceId = referenceId;
+    }
+
+    public void setRank(String rank) {
+        this.rank = rank;
     }
 }

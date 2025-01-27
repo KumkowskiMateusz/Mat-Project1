@@ -15,6 +15,8 @@ public class Inventory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    private Integer userId;
+
     private Integer backpackSpace;
 
     private Double bankAccount;

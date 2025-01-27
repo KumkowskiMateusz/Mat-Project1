@@ -4,10 +4,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.revature.Project1.exceptions.NotFound;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,28 +52,22 @@ public class HomeController {
 
     @GetMapping(value = "")
     public ResponseEntity getUserInfoById(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie){
-        Optional<User> resultUser;
+
         try{
-            resultUser = userService.getUserById(Integer.parseInt(cookie));
-        } catch (Exception e){
+            User resultUser = userService.getUserById(Integer.parseInt(cookie));
+            return ResponseEntity.status(HttpStatus.OK).body(resultUser);
+        }
+        catch (NotFound e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        catch (Exception e) {
             return ResponseEntity.status(500).body("Something went wrong");
         }
-        if(resultUser.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-        return ResponseEntity.status(HttpStatus.OK).body(resultUser);
     }
 
 
     @PostMapping(value = "")
     public ResponseEntity postNewDuck(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie){
-
-        //USER AUTHORIZATION
-        Optional<User> resultUser;
-        try{
-            resultUser = userService.getUserById(Integer.parseInt(cookie));
-        } catch (Exception e){
-            return ResponseEntity.status(500).body("Something went wrong");
-        }
-        if(resultUser.isEmpty()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
 
         //OBTAINING WORLD DATA
         World world = null;
@@ -81,9 +80,13 @@ public class HomeController {
 
         //CHECKING BACKPACK SPACE
         try{
+            User resultUser = userService.getUserById(Integer.parseInt(cookie));
             List<Duck> resultDucks = duckService.getDucksByForeignId(Integer.parseInt(cookie));
-            if(resultUser.get().getBackpack_space() < resultDucks.size()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Backpack Too Full");
-        } catch (Exception e) {
+        }
+        catch (NotFound e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        catch (Exception e) {
             return ResponseEntity.status(500).body("Something Went Wrong");
         }
 
@@ -93,8 +96,9 @@ public class HomeController {
         Boolean duckAvailable = supFunctions.duckAvailable(duckRank,duckAmounts);
         duckRank = duckAvailable ? duckRank : "C";
 
-        Duck returnDuck = new Duck(duckRank);
-        returnDuck.setReference_id(Integer.parseInt(cookie));
+        Duck returnDuck = new Duck();
+        returnDuck.setRank(duckRank);
+        returnDuck.setReferenceId(Integer.parseInt(cookie));
         returnDuck.setNickname("DefaultName");
 
         try{
@@ -119,10 +123,10 @@ public class HomeController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping(value = "")
     public ResponseEntity patchDuckNicknameById (@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie, @RequestBody Duck duck) {
         if(cookie.equals("none")) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-        if(!cookie.equals(Integer.toString(duck.getReference_id()))) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         try {
             Optional<Duck> resultDucks = duckService.setDuckNicknameById(duck);
             return ResponseEntity.status(HttpStatus.OK).body(resultDucks);
@@ -160,17 +164,18 @@ public class HomeController {
         return ResponseEntity.status(HttpStatus.OK).body(resultDucks);
     }
 
+    @PreAuthorize("ADMIN")
     @PatchMapping(value = "ducks")
     public ResponseEntity patchSetAvailableDucks(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie,@RequestBody World world){
         if(cookie.equals("none")) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         try {
-            Optional<User> resultUser = userService.getUserById(Integer.parseInt(cookie));
-            if(resultUser.isEmpty())  return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Improper Info");
-            if(resultUser.get().getAdmin() == 0) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
-
+            User resultUser = userService.getUserById(Integer.parseInt(cookie));
             World resultWorld = worldService.setWorldValues(world);
             return ResponseEntity.status(HttpStatus.OK).body(resultWorld);
-        } catch (ClientSideException e) {
+        } catch (NotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        catch (ClientSideException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Improper Info");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Something Went wrong");
@@ -178,43 +183,52 @@ public class HomeController {
     }
 
     @GetMapping(value = "world")
-    public ResponseEntity getWorldInfo(){
+    public ResponseEntity getWorldInfo(@RequestBody World world){
         try {
-            World world = worldService.getWorldValuesById(1);
-            return ResponseEntity.status(HttpStatus.OK).body(world);
+            World gotWorld = worldService.getWorldValuesById(world.getId());
+            return ResponseEntity.status(HttpStatus.OK).body(gotWorld);
         }
         catch (Exception e){
-            return ResponseEntity.status(HttpStatus.OK).body(worldService.createWorld(new World()));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Id");
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "price")
     public ResponseEntity getBackpackPrice(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie){
         if(cookie.equals("none")) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         try {
-            Optional<User> resultUser = userService.getUserById(Integer.parseInt(cookie));
-            if (resultUser.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Improper Info");
-            double backpackPrice = Math.pow(1.5,resultUser.get().getBackpack_space() - 5.0);
+            User resultUser = userService.getUserById(Integer.parseInt(cookie));
+            double backpackPrice = Math.pow(1.5,resultUser.getInventory().getBackpackSpace() - 5.0);
             backpackPrice = Math.round(backpackPrice * 100.0) / 100.0;
             return ResponseEntity.status(HttpStatus.OK).body(backpackPrice);
-        } catch (Exception e){
+        }
+        catch (NotFound e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        catch (Exception e){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping(value = "price")
-    public ResponseEntity buyBackpack(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie){
+    public ResponseEntity buyBackpack(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie,
+                                      @AuthenticationPrincipal UserDetails userDetails){
         if(cookie.equals("none")) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         try {
-            Optional<User> resultUser = userService.getUserById(Integer.parseInt(cookie));
-            if (resultUser.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Improper Info");
-            double backpackPrice = Math.pow(1.5,resultUser.get().getBackpack_space() - 5.0);
+            User resultUser = userService.getUserByUsername(userDetails.getUsername());
+
+            double backpackPrice = Math.pow(1.5,resultUser.getInventory().getBackpackSpace() - 5.0);
             backpackPrice = Math.round(backpackPrice * -100.0) / 100.0;
-            if(backpackPrice * -1 > resultUser.get().getBank_account()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Too Expensive");
-            User user = userService.setUserBankAccount(resultUser.get(),backpackPrice);
+            if(backpackPrice * -1 > resultUser.getInventory().getBankAccount()) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Too Expensive");
+            User user = userService.setUserBankAccount(resultUser,backpackPrice);
             user = userService.setUserBackpackAmount(user);
             return ResponseEntity.status(HttpStatus.OK).body(user);
-        } catch (Exception e) {
+        } catch(NotFound e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
     }
