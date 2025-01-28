@@ -43,8 +43,6 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "referenceId")
     private Set<Duck> ducks;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
-    private Set<Auth> auths;
 
     public User(String password, String username, UserTypes userType) {
         log.trace("Parametrized constructor for User " + username);

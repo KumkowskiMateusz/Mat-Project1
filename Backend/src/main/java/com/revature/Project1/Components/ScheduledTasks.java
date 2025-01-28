@@ -27,19 +27,19 @@ public class ScheduledTasks {
         this.supFunctions = supFunctions;
     }
 
-    @Scheduled(fixedRate = 5000)
-    private void increaseBankAccounts(){
-        List<User> allUsers = userService.getAllUsers();
-        for(User user : allUsers){
-            List<Duck> ducks = duckService.getDucksByForeignId(user.getId());
-            Double totalAmountIncrease = supFunctions.getTotalAmount(ducks,1);
-            try{
-                userService.setUserBankAccount(user,totalAmountIncrease);
-            } catch (Exception e) {
-                System.out.println("Bank Not Updated");
-            }
-
-        }
-
-    }
+//    @Scheduled(fixedRate = 5000)
+//    private void increaseBankAccounts(){
+//        List<User> allUsers = userService.getAllUsers();
+//        for(User user : allUsers){
+//            List<Duck> ducks = duckService.getDucksByForeignId(user.getId());
+//            Double totalAmountIncrease = supFunctions.getTotalAmount(ducks,1);
+//            try{
+//                userService.setUserBankAccount(user,totalAmountIncrease);
+//            } catch (Exception e) {
+//                System.out.println("Bank Not Updated");
+//            }
+//
+//        }
+//
+//    }
 }

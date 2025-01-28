@@ -5,10 +5,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Entity
-@Table(name = "worldDucks")
+@Table(name = "world_ducks")
 public class WorldDuck {
     private static final Logger log = LogManager.getLogger(WorldDuck.class);
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private Integer id;
 
     @Column(nullable = false)

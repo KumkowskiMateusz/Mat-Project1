@@ -5,6 +5,7 @@ import java.util.Optional;
 import com.revature.Project1.Components.Encoder;
 import com.revature.Project1.Components.FileLogger;
 import com.revature.Project1.Dtos.UserDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
 import com.revature.Project1.exceptions.ConflictException;
@@ -37,6 +39,11 @@ public class AuthController {
         this.userService = userService;
         this.encoder = encoder;
         this.log = log.log;
+    }
+
+    @GetMapping("csrf")
+    public ResponseEntity<CsrfToken> getCsrfToken(HttpServletRequest servlet){
+        return ResponseEntity.status(HttpStatus.OK).body((CsrfToken)servlet.getAttribute("_csrf"));
     }
 
     @PostMapping(value = "register")
@@ -108,52 +115,5 @@ public class AuthController {
     }
 
 
-
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("loginToken")
-    public ResponseEntity<?> checkLoginToken(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie,
-                                            @AuthenticationPrincipal UserDetails userDetails){
-        if(cookie.equals("none")) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Cookie Found");
-
-        User user = userService.getUserByUsername(userDetails.getUsername());
-        if(user.getLoginToken() != cookie) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
-        return ResponseEntity.ok().build();
-    }
-
-    @PreAuthorize("isAuthenticated()")
-    @GetMapping("refreshToken")
-    public ResponseEntity checkPageToken(@CookieValue(value = "pageCookie", defaultValue = "none") String cookie,
-                                         @AuthenticationPrincipal UserDetails userDetails){
-        if(cookie.equals("none")) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Cookie Found");
-
-        User user = userService.getUserByUsername(userDetails.getUsername());
-        if(user.getRefreshToken() != cookie) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Token");
-
-        return ResponseEntity.ok().build();
-        }
-
-    @PutMapping("loginToken")
-    public ResponseEntity<?> setLoginToken(@RequestBody User user){
-        try{
-            String token = userService.SetLoginToken(user.getId());
-            log.trace("Login Token Set");
-            return ResponseEntity.status(HttpStatus.OK).body(token);
-        }catch(Exception e){
-            log.error("Error");
-            return ResponseEntity.status(HttpStatus.SEE_OTHER).body("Error");
-        }
-    }
-
-    @PutMapping("refreshToken")
-    public ResponseEntity<?> setRefreshToken(@RequestBody User user) {
-        try {
-            String token = userService.SetRefreshToken(user.getId());
-            log.trace("Refresh Token Set");
-            return ResponseEntity.status(HttpStatus.OK).body(token);
-        } catch (Exception e) {
-            log.error("Error");
-            return ResponseEntity.status(HttpStatus.SEE_OTHER).body("Error");
-        }
-    }
     }
 
