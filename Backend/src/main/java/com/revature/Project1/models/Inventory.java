@@ -18,6 +18,27 @@ public class Inventory {
     private Integer userId;
 
     private Integer backpackSpace;
+    private Integer backpackSpaceUsed;
+
+    public Integer getBackpackSpaceUsed() {
+        return backpackSpaceUsed;
+    }
+
+    public void setBackpackSpaceUsed(Integer backpackSpaceUsed) {
+        this.backpackSpaceUsed = backpackSpaceUsed;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     private Double bankAccount;
 

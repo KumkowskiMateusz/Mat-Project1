@@ -33,17 +33,17 @@ public class User {
     private String password;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private UserTypes userType;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "inventory_id", referencedColumnName = "id")
     private Inventory inventory;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "referenceId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "referenceId")
     private Set<Duck> ducks;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinColumn(name = "userId")
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "userId")
     private Set<Auth> auths;
 
     public User(String password, String username, UserTypes userType) {

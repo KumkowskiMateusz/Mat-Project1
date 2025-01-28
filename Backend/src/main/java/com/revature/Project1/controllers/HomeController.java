@@ -3,8 +3,10 @@ package com.revature.Project1.controllers;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.revature.Project1.exceptions.NotFound;
+import com.revature.Project1.models.WorldDuck;
 import org.aspectj.weaver.ast.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -67,7 +69,7 @@ public class HomeController {
 
 
     @PostMapping(value = "")
-    public ResponseEntity postNewDuck(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie){
+    public ResponseEntity postNewDuck(@AuthenticationPrincipal UserDetails userDetails){
 
         //OBTAINING WORLD DATA
         World world = null;
@@ -79,9 +81,11 @@ public class HomeController {
         }
 
         //CHECKING BACKPACK SPACE
+        User resultUser;
         try{
-            User resultUser = userService.getUserById(Integer.parseInt(cookie));
-            List<Duck> resultDucks = duckService.getDucksByForeignId(Integer.parseInt(cookie));
+            resultUser = userService.getUserByUsername(userDetails.getUsername());
+            if(resultUser.getInventory().getBackpackSpaceUsed() >= resultUser.getInventory().getBackpackSpace()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Backpack Full");
+
         }
         catch (NotFound e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
@@ -90,27 +94,23 @@ public class HomeController {
             return ResponseEntity.status(500).body("Something Went Wrong");
         }
 
+
+
         // Calculating Duck Obtained
-        String duckRank = supFunctions.obtainDuckRank(supFunctions.rollForDuck());
-        Map<String,Integer> duckAmounts = world.convertToMap();
-        Boolean duckAvailable = supFunctions.duckAvailable(duckRank,duckAmounts);
-        duckRank = duckAvailable ? duckRank : "C";
+        Set<WorldDuck> duckAmounts = world.getWorldInfo();
+        WorldDuck revievedDuck = worldService.getDuckRank(duckAmounts);
 
-        Duck returnDuck = new Duck();
-        returnDuck.setRank(duckRank);
-        returnDuck.setReferenceId(Integer.parseInt(cookie));
-        returnDuck.setNickname("DefaultName");
 
-        try{
-            World updatedWorld = worldService.getWorldValuesById(1);
-            if(duckRank.equals("B")) updatedWorld.setB_rank(updatedWorld.getB_rank() - 1);
-            if(duckRank.equals("A")) updatedWorld.setB_rank(updatedWorld.getA_rank() - 1);
-            if(duckRank.equals("S")) updatedWorld.setB_rank(updatedWorld.getS_rank() - 1);
-            if(duckRank.equals("SS")) updatedWorld.setB_rank(updatedWorld.getSs_rank() - 1);
-            worldService.setWorldValues(updatedWorld);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Something Went Wrong");
+
+
+        Duck returnDuck;
+        if(revievedDuck == null){
+            returnDuck = new Duck(resultUser.getId(),"Trash","Spare Garbage",0);
         }
+        else{
+            returnDuck = new Duck(resultUser.getId(),revievedDuck.getRank(),revievedDuck.getRank() + " Duck",revievedDuck.getValue());
+        }
+
 
         try{
             returnDuck = duckService.createDuck(returnDuck);
@@ -128,7 +128,7 @@ public class HomeController {
     public ResponseEntity patchDuckNicknameById (@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie, @RequestBody Duck duck) {
         if(cookie.equals("none")) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         try {
-            Optional<Duck> resultDucks = duckService.setDuckNicknameById(duck);
+            Duck resultDucks = duckService.setDuckNicknameById(duck);
             return ResponseEntity.status(HttpStatus.OK).body(resultDucks);
         } catch (ClientSideException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Improper Info");
@@ -143,7 +143,7 @@ public class HomeController {
         try {
             Optional<Duck> resultDuck = duckService.deleteDuckById(duck);
             if (resultDuck.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Improper Info");
-            if(resultDuck.get().getReference_id() != Integer.parseInt(cookie)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Improper Info");
+            if(resultDuck.get().getReferenceId() != Integer.parseInt(cookie)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Improper Info");
             return ResponseEntity.status(HttpStatus.OK).body(resultDuck);
         }
         catch (ClientSideException e){

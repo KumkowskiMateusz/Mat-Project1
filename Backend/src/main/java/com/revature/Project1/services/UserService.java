@@ -52,34 +52,34 @@ public class UserService {
         return foundUser.get();
     }
 
-    public String SetRefreshToken(Integer id){
-        log.trace("Setting refresh token for user with id " + id);
-        Optional<User> foundUser = userDAO.findById(id);
-        if(foundUser.isEmpty()) throw new NotFound("User not found");
-        User user = foundUser.get();
-
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[64];
-        random.nextBytes(bytes);
-        user.setRefreshToken(bytes.toString());
-
-        userDAO.save(user);
-        return bytes.toString();
-    }
-
-    public String SetLoginToken(Integer id){
-        log.trace("Setting login token for user with id " + id);
-        Optional<User> foundUser = userDAO.findById(id);
-        if(foundUser.isEmpty()) throw new NotFound("User not found");
-        User user = foundUser.get();
-
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[64];
-        random.nextBytes(bytes);
-
-        userDAO.save(user);
-        return bytes.toString();
-    }
+//    public String SetRefreshToken(Integer id){
+//        log.trace("Setting refresh token for user with id " + id);
+//        Optional<User> foundUser = userDAO.findById(id);
+//        if(foundUser.isEmpty()) throw new NotFound("User not found");
+//        User user = foundUser.get();
+//
+//        SecureRandom random = new SecureRandom();
+//        byte[] bytes = new byte[64];
+//        random.nextBytes(bytes);
+//        user.setRefreshToken(bytes.toString());
+//
+//        userDAO.save(user);
+//        return bytes.toString();
+//    }
+//
+//    public String SetLoginToken(Integer id){
+//        log.trace("Setting login token for user with id " + id);
+//        Optional<User> foundUser = userDAO.findById(id);
+//        if(foundUser.isEmpty()) throw new NotFound("User not found");
+//        User user = foundUser.get();
+//
+//        SecureRandom random = new SecureRandom();
+//        byte[] bytes = new byte[64];
+//        random.nextBytes(bytes);
+//
+//        userDAO.save(user);
+//        return bytes.toString();
+//    }
 
     @Transactional
     public User createUser(User user) throws PasswordException, UsernameException, ConflictException {

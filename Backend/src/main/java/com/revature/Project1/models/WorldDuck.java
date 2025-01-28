@@ -15,12 +15,16 @@ public class WorldDuck {
     private Integer worldId;
     private String rank;
     private Integer value;
+    private Integer chance;
+    private Integer amount;
 
-    public WorldDuck(Integer worldId, String rank, Integer value) {
+    public WorldDuck(Integer worldId, String rank, Integer value, Integer chance, Integer amount) {
         log.trace("Parametrized constructor for WorldDuck");
         this.worldId = worldId;
         this.rank = rank;
         this.value = value;
+        this.chance = chance;
+        this.amount = 0;
     }
 
     public WorldDuck() {
@@ -28,6 +32,24 @@ public class WorldDuck {
         this.worldId = 0;
         this.rank = "Default";
         this.value = 0;
+        this.chance = 0;
+    }
+
+    public Integer getAmount() {
+        return amount;
+    }
+
+    public void setAmount(Integer amount) {
+        this.amount = amount;
+    }
+
+    public Integer getChance() {
+        return chance;
+    }
+
+    public void setChance(Integer chance) {
+        log.trace("Setting chance to " + chance);
+        this.chance = chance;
     }
 
     public Integer getValue() {
