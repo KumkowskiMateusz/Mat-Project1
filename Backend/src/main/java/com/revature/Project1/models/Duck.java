@@ -19,7 +19,7 @@ public class Duck {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private Integer value;
+    private Integer price;
     private Integer referenceId;
     private String rank;
     private String nickname;
@@ -28,12 +28,12 @@ public class Duck {
         log.trace("No-args constructor for Duck");
     }
 
-    public Duck(int referenceId, String rank, String nickname, int value) {
+    public Duck(int referenceId, String rank, String nickname, int price) {
         log.trace("Parametrized constructor for Duck " + referenceId);
         this.rank = rank;
         this.nickname = nickname;
         this.referenceId = referenceId;
-        this.value = value;
+        this.price = price;
     }
 
     public int getId() {
@@ -54,12 +54,12 @@ public class Duck {
     }
 
     public Integer getValue() {
-        return value;
+        return price;
     }
 
     public void setValue(Integer value) {
         log.trace("Setting value to " + value);
-        this.value = value;
+        this.price = value;
     }
 
     public Integer getReferenceId() {

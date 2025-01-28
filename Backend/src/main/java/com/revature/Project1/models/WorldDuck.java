@@ -8,22 +8,23 @@ import org.apache.logging.log4j.Logger;
 @Table(name = "world_ducks")
 public class WorldDuck {
     private static final Logger log = LogManager.getLogger(WorldDuck.class);
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false)
     private Integer worldId;
     private String rank;
-    private Integer value;
+    private Integer price;
     private Integer chance;
     private Integer amount;
 
-    public WorldDuck(Integer worldId, String rank, Integer value, Integer chance, Integer amount) {
+    public WorldDuck(Integer worldId, String rank, Integer value, Integer chance, Integer price) {
         log.trace("Parametrized constructor for WorldDuck");
         this.worldId = worldId;
         this.rank = rank;
-        this.value = value;
+        this.price = value;
         this.chance = chance;
         this.amount = 0;
     }
@@ -32,7 +33,7 @@ public class WorldDuck {
         log.trace("No-args constructor for WorldDuck");
         this.worldId = 0;
         this.rank = "Default";
-        this.value = 0;
+        this.price = 0;
         this.chance = 0;
     }
 
@@ -54,12 +55,12 @@ public class WorldDuck {
     }
 
     public Integer getValue() {
-        return value;
+        return price;
     }
 
     public void setValue(Integer value) {
         log.trace("Setting value to " + value);
-        this.value = value;
+        this.price = value;
     }
 
     public Integer getWorldId() {

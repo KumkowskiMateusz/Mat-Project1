@@ -9,8 +9,9 @@ import org.apache.logging.log4j.Logger;
 public class Inventory {
 
     private static final Logger log = LogManager.getLogger(Inventory.class);
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private Integer userId;
