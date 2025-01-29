@@ -1,4 +1,4 @@
-package com.revature.Project1.models;
+package com.revature.Project1.Models;
 
 public enum UserTypes {
     ADMIN(1),

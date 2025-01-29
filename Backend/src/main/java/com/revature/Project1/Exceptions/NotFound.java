@@ -1,4 +1,4 @@
-package com.revature.Project1.exceptions;
+package com.revature.Project1.Exceptions;
 
 public class NotFound extends RuntimeException {
     public NotFound(String message) {

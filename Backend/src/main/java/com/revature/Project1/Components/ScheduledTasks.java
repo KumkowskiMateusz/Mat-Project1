@@ -1,17 +1,10 @@
 package com.revature.Project1.Components;
 
-import com.revature.Project1.models.Duck;
-import com.revature.Project1.models.User;
-import com.revature.Project1.services.DuckService;
-import com.revature.Project1.services.UserService;
-import com.revature.Project1.services.WorldService;
+import com.revature.Project1.Services.DuckService;
+import com.revature.Project1.Services.UserService;
+import com.revature.Project1.Services.WorldService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 @Component
 public class ScheduledTasks {

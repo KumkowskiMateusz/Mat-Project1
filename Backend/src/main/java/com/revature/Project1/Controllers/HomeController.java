@@ -1,13 +1,11 @@
-package com.revature.Project1.controllers;
+package com.revature.Project1.Controllers;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import com.revature.Project1.exceptions.NotFound;
-import com.revature.Project1.models.WorldDuck;
-import org.aspectj.weaver.ast.Not;
+import com.revature.Project1.Exceptions.NotFound;
+import com.revature.Project1.Models.WorldDuck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,13 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.revature.Project1.Components.SupplementaryFunctions;
-import com.revature.Project1.exceptions.ClientSideException;
-import com.revature.Project1.models.Duck;
-import com.revature.Project1.models.User;
-import com.revature.Project1.models.World;
-import com.revature.Project1.services.DuckService;
-import com.revature.Project1.services.UserService;
-import com.revature.Project1.services.WorldService;
+import com.revature.Project1.Exceptions.ClientSideException;
+import com.revature.Project1.Models.Duck;
+import com.revature.Project1.Models.User;
+import com.revature.Project1.Models.World;
+import com.revature.Project1.Services.DuckService;
+import com.revature.Project1.Services.UserService;
+import com.revature.Project1.Services.WorldService;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge=3600)
@@ -52,6 +50,7 @@ public class HomeController {
         this.supFunctions = supFunctions;
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "")
     public ResponseEntity getUserInfoById(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie){
 
@@ -67,7 +66,7 @@ public class HomeController {
         }
     }
 
-
+    @PreAuthorize("isAuthenticated()")
     @PostMapping(value = "")
     public ResponseEntity postNewDuck(@AuthenticationPrincipal UserDetails userDetails){
 
@@ -137,6 +136,7 @@ public class HomeController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping(value = "")
     public ResponseEntity deleteDuckById (@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie, @RequestBody Duck duck){
         if(cookie.equals("none")) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
@@ -153,6 +153,7 @@ public class HomeController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "ducks")
     public ResponseEntity getDucksOwnedById (@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie){
         List<Duck> resultDucks;
@@ -164,7 +165,7 @@ public class HomeController {
         return ResponseEntity.status(HttpStatus.OK).body(resultDucks);
     }
 
-    @PreAuthorize("ADMIN")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping(value = "ducks")
     public ResponseEntity patchSetAvailableDucks(@CookieValue(value = "project1LoginCookie", defaultValue = "none") String cookie,@RequestBody World world){
         if(cookie.equals("none")) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
@@ -182,6 +183,7 @@ public class HomeController {
         }
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping(value = "world")
     public ResponseEntity getWorldInfo(@RequestBody World world){
         try {

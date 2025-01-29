@@ -1,6 +1,6 @@
-package com.revature.Project1.daos;
+package com.revature.Project1.Daos;
 
-import com.revature.Project1.models.User;
+import com.revature.Project1.Models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

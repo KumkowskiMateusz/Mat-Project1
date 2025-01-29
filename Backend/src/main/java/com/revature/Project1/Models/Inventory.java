@@ -1,4 +1,4 @@
-package com.revature.Project1.models;
+package com.revature.Project1.Models;
 
 import jakarta.persistence.*;
 import org.apache.logging.log4j.LogManager;

@@ -1,11 +1,8 @@
-package com.revature.Project1.models;
+package com.revature.Project1.Models;
 
 import jakarta.persistence.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.annotations.ColumnDefault;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.lang.NonNull;
 
 import java.util.Set;
 

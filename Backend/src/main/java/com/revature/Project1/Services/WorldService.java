@@ -1,14 +1,13 @@
-package com.revature.Project1.services;
+package com.revature.Project1.Services;
 
-import com.revature.Project1.daos.WorldDAO;
-import com.revature.Project1.daos.WorldDuckDAO;
-import com.revature.Project1.exceptions.ClientSideException;
-import com.revature.Project1.models.World;
-import com.revature.Project1.models.WorldDuck;
+import com.revature.Project1.Daos.WorldDAO;
+import com.revature.Project1.Daos.WorldDuckDAO;
+import com.revature.Project1.Exceptions.ClientSideException;
+import com.revature.Project1.Models.World;
+import com.revature.Project1.Models.WorldDuck;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

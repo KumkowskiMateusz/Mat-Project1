@@ -1,21 +1,17 @@
-package com.revature.Project1.services;
+package com.revature.Project1.Services;
 
 import com.revature.Project1.Components.Encoder;
 import com.revature.Project1.Components.FileLogger;
-import com.revature.Project1.daos.InventoryDAO;
-import com.revature.Project1.daos.UserDAO;
-import com.revature.Project1.exceptions.*;
-import com.revature.Project1.models.Inventory;
-import com.revature.Project1.models.User;
+import com.revature.Project1.Daos.InventoryDAO;
+import com.revature.Project1.Daos.UserDAO;
+import com.revature.Project1.Exceptions.*;
+import com.revature.Project1.Models.Inventory;
+import com.revature.Project1.Models.User;
 import jakarta.transaction.Transactional;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
-import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 

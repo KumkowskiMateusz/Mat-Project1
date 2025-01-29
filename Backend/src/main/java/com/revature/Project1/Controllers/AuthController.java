@@ -1,6 +1,4 @@
-package com.revature.Project1.controllers;
-
-import java.util.Optional;
+package com.revature.Project1.Controllers;
 
 import com.revature.Project1.Components.Encoder;
 import com.revature.Project1.Components.FileLogger;
@@ -11,16 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.*;
 
-import com.revature.Project1.exceptions.ConflictException;
-import com.revature.Project1.exceptions.PasswordException;
-import com.revature.Project1.exceptions.UsernameException;
-import com.revature.Project1.models.User;
-import com.revature.Project1.services.UserService;
+import com.revature.Project1.Exceptions.ConflictException;
+import com.revature.Project1.Exceptions.PasswordException;
+import com.revature.Project1.Exceptions.UsernameException;
+import com.revature.Project1.Models.User;
+import com.revature.Project1.Services.UserService;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,11 +37,13 @@ public class AuthController {
         this.log = log.log;
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("csrf")
     public ResponseEntity<CsrfToken> getCsrfToken(HttpServletRequest servlet){
         return ResponseEntity.status(HttpStatus.OK).body((CsrfToken)servlet.getAttribute("_csrf"));
     }
 
+    @PreAuthorize("permitAll()")
     @PostMapping(value = "register")
     public ResponseEntity<?> registerAccount(@RequestBody User user){
         try{
@@ -71,6 +69,7 @@ public class AuthController {
         }
     }
 
+    @PreAuthorize("permitAll()")
     @PostMapping(value = "login")
     public ResponseEntity<?> loginAccount(@RequestBody User user,HttpServletResponse servlet){
 
@@ -86,10 +85,6 @@ public class AuthController {
                     userDTO.setUsername(resultUser.getUsername());
                     userDTO.setRole(resultUser.getUserType().toString());
 
-                    Cookie cookie = new Cookie("project1LoginCookie", encoder.passwordEncoder.encode(Integer.valueOf(user.getId()).toString()));
-                    cookie.setMaxAge(100000);
-                    servlet.addCookie(cookie);
-
                     log.trace("User Logged In");
                     return ResponseEntity.status(HttpStatus.OK).body(userDTO);
                 } else{
@@ -102,14 +97,9 @@ public class AuthController {
             }
     }
 
+    @PreAuthorize("permitAll()")
     @PostMapping(value = "logout")
     public ResponseEntity<?> logout(HttpServletResponse servlet){
-        Cookie pageCookie = new Cookie("pageCookie", null);
-        pageCookie.setMaxAge(-100000);
-        servlet.addCookie(pageCookie);
-        Cookie cookie = new Cookie("project1LoginCookie", null);
-        cookie.setMaxAge(-100000);
-        servlet.addCookie(cookie);
         log.trace("User Logged Out");
         return ResponseEntity.status(HttpStatus.OK).body("Logged Out");
     }
