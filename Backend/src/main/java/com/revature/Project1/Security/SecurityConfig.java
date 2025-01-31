@@ -1,4 +1,4 @@
-package com.revature.Project1.Config;
+package com.revature.Project1.Security;
 
 import com.revature.Project1.Dtos.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,15 +6,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
@@ -43,6 +40,9 @@ public class SecurityConfig {
     @Autowired
     private MyUserDetailsService userDetailsService;
 
+    @Autowired
+    private JwtRequestFilter jwtRequestFilter;
+
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
         CsrfTokenRepository csrfTokenRepository = new HttpSessionCsrfTokenRepository();
@@ -54,6 +54,9 @@ public class SecurityConfig {
 
                 .httpBasic(withDefaults())
                 .csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(withDefaults())
                 .build();
     }
 
