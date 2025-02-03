@@ -1,9 +1,13 @@
 package com.revature.Project1.Security;
 
 import com.revature.Project1.Dtos.MyUserDetailsService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +16,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CsrfTokenRepository;
 import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.web.cors.CorsConfiguration;
@@ -20,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -37,11 +44,24 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Autowired
     private MyUserDetailsService userDetailsService;
-
-    @Autowired
+    private CookieCsrfTokenRepository customCsrf;
     private JwtRequestFilter jwtRequestFilter;
+    @Autowired
+    public SecurityConfig(MyUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+        this.customCsrf = new CookieCsrfTokenRepository();
+        this.jwtRequestFilter = new JwtRequestFilter();
+        customCsrf.setCookieCustomizer(new Consumer<ResponseCookie.ResponseCookieBuilder>() {
+            @Override
+            public void accept(ResponseCookie.ResponseCookieBuilder responseCookieBuilder) {
+                responseCookieBuilder.httpOnly(false);
+                responseCookieBuilder.secure(true);
+                responseCookieBuilder.maxAge(1000* 60 * 60);
+                responseCookieBuilder.domain("localhost:5134");
+            }
+        });
+    }
 
     @Bean
     protected SecurityFilterChain configure(HttpSecurity http) throws Exception {
@@ -50,10 +70,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(request -> request.getServletPath().endsWith("login")).permitAll()
                         .requestMatchers(request -> request.getServletPath().endsWith("register")).permitAll()
+                        .requestMatchers(request -> request.getServletPath().endsWith("csrf")).permitAll()
                         .anyRequest().authenticated())
 
                 .httpBasic(withDefaults())
-                .csrf(csrf -> csrf.csrfTokenRepository(csrfTokenRepository))
+                .csrf(csrf -> csrf
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                )
+
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(withDefaults())
@@ -79,5 +103,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
+
+
 
 }

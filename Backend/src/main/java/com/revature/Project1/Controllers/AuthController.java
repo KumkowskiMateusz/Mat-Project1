@@ -37,7 +37,7 @@ public class AuthController {
         this.log = log.log;
     }
 
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("permitAll()")
     @GetMapping("csrf")
     public ResponseEntity<CsrfToken> getCsrfToken(HttpServletRequest servlet){
         return ResponseEntity.status(HttpStatus.OK).body((CsrfToken)servlet.getAttribute("_csrf"));
