@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -35,9 +37,9 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
 
     /*
-        * This method configures the security filter chain for the application.
-        * It requires all requests to be authenticated
-        * Think of this as a step of processes that must be completed before a request is allowed to be processed to the controller
+     * This method configures the security filter chain for the application.
+     * It requires all requests to be authenticated
+     * Think of this as a step of processes that must be completed before a request is allowed to be processed to the controller
      */
     @Bean
     BCryptPasswordEncoder passwordEncoder() {
@@ -47,6 +49,7 @@ public class SecurityConfig {
     private MyUserDetailsService userDetailsService;
     private CookieCsrfTokenRepository customCsrf;
     private JwtRequestFilter jwtRequestFilter;
+
     @Autowired
     public SecurityConfig(MyUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
@@ -57,7 +60,7 @@ public class SecurityConfig {
             public void accept(ResponseCookie.ResponseCookieBuilder responseCookieBuilder) {
                 responseCookieBuilder.httpOnly(false);
                 responseCookieBuilder.secure(true);
-                responseCookieBuilder.maxAge(1000* 60 * 60);
+                responseCookieBuilder.maxAge(1000 * 60 * 60);
                 responseCookieBuilder.domain("localhost:5134");
             }
         });
@@ -93,9 +96,14 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("http://frontend-server.com")); // Replace with your frontend server URL
+        corsConfiguration.setAllowedOrigins(List.of("")); // Replace with your frontend server URL
         corsConfiguration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowCredentials(true);
         corsConfiguration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type", "X-CSRF-TOKEN"));
@@ -103,7 +111,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", corsConfiguration);
         return source;
     }
-
-
-
 }
+
