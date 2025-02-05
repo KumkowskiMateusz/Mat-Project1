@@ -51,10 +51,10 @@ public class SecurityConfig {
     private JwtRequestFilter jwtRequestFilter;
 
     @Autowired
-    public SecurityConfig(MyUserDetailsService userDetailsService) {
+    public SecurityConfig(MyUserDetailsService userDetailsService, JwtRequestFilter jwtRequestFilter) {
         this.userDetailsService = userDetailsService;
         this.customCsrf = new CookieCsrfTokenRepository();
-        this.jwtRequestFilter = new JwtRequestFilter();
+        this.jwtRequestFilter = jwtRequestFilter;
         customCsrf.setCookieCustomizer(new Consumer<ResponseCookie.ResponseCookieBuilder>() {
             @Override
             public void accept(ResponseCookie.ResponseCookieBuilder responseCookieBuilder) {
