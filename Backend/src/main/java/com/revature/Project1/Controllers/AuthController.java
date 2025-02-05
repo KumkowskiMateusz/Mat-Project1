@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.csrf.CsrfToken;
+import org.springframework.security.web.csrf.CsrfTokenRepository;
+import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.web.bind.annotation.*;
 
 import com.revature.Project1.Exceptions.ConflictException;
@@ -32,6 +34,7 @@ public class AuthController {
     private final Encoder encoder;
     private final Logger log;
     private final JwtUtil jwtUtil;
+    private final CsrfTokenRepository csrfTokenRepository = new HttpSessionCsrfTokenRepository();
 
     @Autowired
     public AuthController(UserService userService , Encoder encoder, FileLogger log, JwtUtil jwtUtil){
@@ -53,8 +56,17 @@ public class AuthController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("csrf")
-    public ResponseEntity<CsrfToken> getCsrfToken(HttpServletRequest servlet){
-        return ResponseEntity.status(HttpStatus.OK).body((CsrfToken)servlet.getAttribute("_csrf"));
+    public ResponseEntity<CsrfToken> getCsrfToken(HttpServletRequest servlet, HttpServletResponse response, HttpServletRequest request) {
+        CsrfToken csrfToken = csrfTokenRepository.generateToken(request);
+        csrfTokenRepository.saveToken(csrfToken, request, response);
+        Cookie csrfCookie = new Cookie("XSRF-TOKEN", csrfToken.getToken());
+        csrfCookie.setPath("/");
+        csrfCookie.setHttpOnly(false);
+
+        response.addCookie(csrfCookie);
+
+        response.setHeader("X-CSRF-TOKEN", csrfToken.getToken());
+        return ResponseEntity.status(HttpStatus.OK).body(csrfToken);
     }
 
     @PreAuthorize("permitAll()")
@@ -85,7 +97,7 @@ public class AuthController {
 
     @PreAuthorize("permitAll()")
     @PostMapping(value = "login")
-    public ResponseEntity<?> loginAccount(@RequestBody User user,HttpServletResponse servlet){
+    public ResponseEntity<?> loginAccount(@RequestBody User user,HttpServletResponse response){
 
             try{
                 User resultUser = userService.getUserByUsername(user);
@@ -100,7 +112,8 @@ public class AuthController {
                     userDTO.setRole(resultUser.getUserType().toString());
                     String tokenGenerated = jwtUtil.generateToken(userDTO.getUsername());
                     Cookie cookie = new Cookie("JWTToken", tokenGenerated);
-                    servlet.addCookie(cookie);
+
+                    response.addCookie(cookie);
                     log.trace("User Logged In");
                     return ResponseEntity.status(HttpStatus.OK).body(tokenGenerated);
                 } else{

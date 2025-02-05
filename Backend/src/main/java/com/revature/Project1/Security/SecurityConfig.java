@@ -71,8 +71,6 @@ public class SecurityConfig {
         CsrfTokenRepository csrfTokenRepository = new HttpSessionCsrfTokenRepository();
         return http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(request -> request.getServletPath().endsWith("login")).permitAll()
-                        .requestMatchers(request -> request.getServletPath().endsWith("register")).permitAll()
                         .requestMatchers(request -> request.getServletPath().endsWith("csrf")).permitAll()
                         .anyRequest().authenticated())
 
